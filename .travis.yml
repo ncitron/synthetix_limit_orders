@@ -3,7 +3,6 @@ node_js:
   - 14
   before_install:
   - npm i -g npm@6.14.8
-  - rm -r package-lock.json
-
+  - rm package-lock.json
 install:
   - npm install
