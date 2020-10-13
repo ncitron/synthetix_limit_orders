@@ -21,30 +21,49 @@ describe("LimitOrder", function() {
         await limitOrder.deployed();
     });
 
-    it("Should be able to fetch sBTC price", async () => {
+    it("Should be able to fetch sBTC price", async function() {
+        this.timeout(1_000_000);
         let rate = await limitOrder.getPrice();
         rate.gt(0).should.equal(true);
     });
 
-    it("Should be able to place a buy limit order", async () => {
+    it("Should be able to place a buy limit order", async function() {
+        this.timeout(1_000_000);
         await sUSD.approve(limitOrder.address, 1);
         let initialBalance = await sUSD.balanceOf(account0.getAddress());
         await limitOrder.placeBuyOrder(1, 12000);
         let finalBalance = await sUSD.balanceOf(account0.getAddress());
         finalBalance.sub(initialBalance).eq(-1).should.equal(true);
+        let order = await limitOrder.getOrder(0);
+        order.price.eq(12000).should.equal(true);
     });
 
-    it("should be able to place a sell limit order", async () => {
+    it("should be able to place a sell limit order", async function() {
+        this.timeout(1_000_000);
         await sBTC.approve(limitOrder.address, 1);
         let initialBalance = await sBTC.balanceOf(account0.getAddress());
         await limitOrder.placeSellOrder(1, 12000);
         let finalBalance = await sBTC.balanceOf(account0.getAddress());
         finalBalance.sub(initialBalance).eq(-1).should.equal(true);
+        let order = await limitOrder.getOrder(0);
+        order.price.eq(12000).should.equal(true);
     });
 
-    /*it("should be able to cancel an order", async () => {
-
-    })*/
+    it("should be able to cancel an order", async function() {
+        this.timeout(1_000_000);
+        await sUSD.approve(limitOrder.address, 1);
+        let initialBalance = await sUSD.balanceOf(account0.getAddress());
+        await limitOrder.placeBuyOrder(1, 12000);
+        let order = await limitOrder.getOrder(0);
+        order.price.eq(12000).should.equal(true);
+        let orderCount = await limitOrder.getOrderCount();
+        orderCount.should.equal(1);
+        await limitOrder.cancelOrder(0);
+        orderCount = await limitOrder.getOrderCount();
+        orderCount.should.equal(0);
+        let finalBalance = await sUSD.balanceOf(account0.getAddress());
+        initialBalance.should.equal(finalBalance);
+    })
 });
 
 
